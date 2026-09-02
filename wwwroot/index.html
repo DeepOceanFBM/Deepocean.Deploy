@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepOcean Deploy Manager</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: rgba(30, 41, 59, 0.85);
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary-color: #64748b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            background-image: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15), transparent 25%);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(15, 23, 42, 0.9);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px;
+            margin-bottom: 30px;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        button {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button.danger {
+            background: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        button.danger:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        button.secondary {
+            background: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        button.secondary:hover {
+            background: var(--secondary-color);
+        }
+
+        .project-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .project-list-item .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .process-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px 15px 15px 55px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .process-card h4 {
+            margin: 0 0 15px 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .process-order-controls {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 45px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            background: rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .process-order-controls .order-idx {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: rgba(59,130,246,0.15);
+            border-radius: 4px;
+            padding: 2px 5px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .order-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 2px;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            transform: none !important;
+        }
+        .order-btn:hover { color: var(--text-color); background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        .remove-process {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            padding: 0;
+            font-size: 18px;
+        }
+
+        /* Run Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .run-project-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .run-project-card:hover { background: rgba(255, 255, 255, 0.05); }
+
+        .logs-container {
+            background: #000;
+            border-radius: 8px;
+            padding: 16px;
+            height: 350px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #a3be8c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-error { color: var(--error-color); }
+        .log-info { color: #81a1c1; }
+        .log-success { color: var(--success-color); }
+
+        /* Custom Tools */
+        .ct-layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 20px;
+            height: calc(100vh - 160px);
+        }
+        .ct-sidebar {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        .ct-sidebar h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--text-muted); }
+        .ct-tool-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .ct-tool-item:hover { background: rgba(255,255,255,0.05); }
+        .ct-tool-item.selected { background: rgba(59,130,246,0.15); border-color: var(--primary-color); color: var(--primary-color); }
+        .ct-tool-item .ct-del { color: var(--danger-color); font-size: 12px; opacity: 0; }
+        .ct-tool-item:hover .ct-del { opacity: 1; }
+        .ct-editor-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+        }
+        .ct-tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+        }
+        .ct-tab {
+            padding: 6px 16px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .ct-tab.active { background: rgba(59,130,246,0.15); color: var(--primary-color); border-color: rgba(59,130,246,0.3); }
+        .ct-editor-container {
+            flex: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 0;
+        }
+        .ct-pkg-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .ct-pkg-tag {
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: var(--primary-color);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .ct-pkg-tag span { cursor: pointer; color: var(--danger-color); }
+
+    </style>
+    <!-- Monaco Editor from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>🚀 DeepOcean</h2>
+        <div class="nav-item active" onclick="switchTab('run-page', this)">⚡ Run Projects</div>
+        <div class="nav-item" onclick="switchTab('manage-page', this)">⚙️ Manage Projects</div>
+        <div class="nav-item" onclick="switchTab('custom-tools-page', this)">🔧 Custom Tools</div>
+    </div>
+
+    <div class="content">
+        <!-- RUN PROJECTS PAGE -->
+        <div id="run-page" class="page active">
+            <div class="card">
+                <h1>Run Projects</h1>
+                <div class="form-group">
+                    <label>Select projects to deploy:</label>
+                    <div class="projects-grid" id="runProjectsGrid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+                <button id="deployBtn" onclick="startDeployment()">Start Deployment ⚡</button>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label style="margin:0;">Deployment Logs</label>
+                    <button class="secondary" style="padding: 5px 10px; font-size: 12px;" onclick="downloadLogs()">💾 Download Logs</button>
+                </div>
+                <div class="logs-container" id="logsContainer"></div>
+            </div>
+        </div>
+
+        <!-- CUSTOM TOOLS PAGE -->
+        <div id="custom-tools-page" class="page">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h1 style="margin:0;">🔧 Custom Tools</h1>
+                <div style="display:flex; gap:8px;">
+                    <button class="secondary" onclick="triggerImportCtp()">📥 Import .CTP</button>
+                    <button onclick="newCustomTool()">+ New Tool</button>
+                </div>
+                <input type="file" id="ctpFileInput" accept=".ctp" style="display:none;" onchange="handleImportCtp(event)">
+            </div>
+            <div class="ct-layout">
+                <div class="ct-sidebar">
+                    <h3>SAVED TOOLS</h3>
+                    <div id="ctToolList"></div>
+                </div>
+                <div class="ct-editor-area">
+                    <div id="ctEditorHeader" style="display:none; flex-direction:column; gap:10px;">
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:200px;">
+                                <label style="font-size:12px;">Tool Name</label>
+                                <input type="text" id="ctToolName" placeholder="MyCustomTool" style="margin-top:4px;" oninput="syncNameFromInput(this.value)">
+                            </div>
+                            <div style="display:flex; gap:8px; align-self:flex-end;">
+                                <button class="secondary" onclick="exportCtp()">📤 Export .CTP</button>
+                                <button class="secondary" onclick="cancelCtEdit()">Cancel</button>
+                                <button onclick="compileCustomTool()">⚙️ Compile & Test</button>
+                                <button onclick="saveCustomTool()">💾 Save Tool</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; margin-bottom:6px; display:block;">NuGet Packages <span style="color:var(--text-muted);">(format: PackageName or PackageName/1.0.0)</span></label>
+                            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                                <input type="text" id="ctPkgInput" placeholder="e.g. Newtonsoft.Json or Serilog/4.0.0" style="flex:1;" onkeydown="if(event.key==='Enter') addCtPackage()">
+                                <button onclick="addCtPackage()">Add</button>
+                            </div>
+                            <div class="ct-pkg-row" id="ctPkgList"></div>
+                        </div>
+                        <div class="ct-tabs">
+                            <div class="ct-tab active" id="tabModel" onclick="switchCtTab('model')">📄 Tool Model</div>
+                            <div class="ct-tab" id="tabWorkflow" onclick="switchCtTab('workflow')">⚙️ WorkFlow</div>
+                        </div>
+                    </div>
+                    <div class="ct-editor-container" id="ctEditorContainer" style="height:500px;">
+                        <div id="ctEditorPlaceholder" style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">
+                            Select or create a tool to start editing
+                        </div>
+                        <div id="monacoEditorModel" style="display:none; width:100%; height:100%;"></div>
+                        <div id="monacoEditorWorkflow" style="display:none; width:100%; height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MANAGE PROJECTS PAGE -->
+    <div id="manage-page" class="page">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1>Manage Projects</h1>
+                <div style="display: flex; gap: 10px;">
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importProjects(event)">
+                    <button class="secondary" onclick="document.getElementById('importFile').click()">📤 Import</button>
+                    <button class="secondary" onclick="exportProjects()">📥 Export</button>
+                    <button onclick="openProjectModal()">+ New Project</button>
+                </div>
+            </div>
+            <div id="manageProjectsList">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+</div>
+
+    <!-- PROJECT MODAL -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Project</h2>
+            
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 2;">
+                    <label>Project Name</label>
+                    <input type="text" id="projNameInput" placeholder="e.g. My Backend App">
+                </div>
+                <div style="flex: 1;">
+                    <label>Type / Env</label>
+                    <input type="text" id="projTypeInput" placeholder="e.g. Debug, Rel">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Project ID</label>
+                <input type="number" id="projIdInput" placeholder="0">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Processes</h3>
+                <div style="display: flex; gap: 10px;">
+                    <select id="processTypeSelect">
+                        <!-- Loaded dynamically from /api/processes -->
+                    </select>
+                    <button onclick="addProcessFromSelect()">Add Process</button>
+                </div>
+            </div>
+
+            <div id="processesContainer">
+                <!-- Dynamically added processes -->
+            </div>
+
+            <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                <button class="secondary" onclick="closeProjectModal()">Cancel</button>
+                <button onclick="saveProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let availableProcesses = [];
+        let allProjects = [];
+        let editingProjectIndex = -1;
+
+        // --- Navigation ---
+        function switchTab(pageId, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+
+            if (pageId === 'manage-page') {
+                renderManageProjects();
+            } else if (pageId === 'custom-tools-page') {
+                initMonaco();
+                loadCtTools();
+            } else {
+                renderRunProjects();
+            }
+        }
+
+        // --- API Calls ---
+        async function fetchProcesses() {
+            try {
+                const res = await fetch('/api/processes');
+                availableProcesses = await res.json();
+                
+                const select = document.getElementById('processTypeSelect');
+                select.innerHTML = '';
+                availableProcesses.forEach(proc => {
+                    const opt = document.createElement('option');
+                    opt.value = proc.Name;
+                    opt.textContent = proc.Name;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("Failed to load processes", err);
+            }
+        }
+
+        async function fetchProjects() {
+            try {
+                const res = await fetch('/api/projects');
+                allProjects = await res.json() || [];
+                renderRunProjects();
+            } catch (err) {
+                console.error("Failed to load projects", err);
+                allProjects = [];
+            }
+        }
+
+        async function saveProjectsToServer() {
+            try {
+                await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(allProjects)
+                });
+            } catch (err) {
+                console.error("Failed to save projects", err);
+            }
+        }
+
+        // --- Init ---
+        async function init() {
+            await fetchProcesses();
+            await fetchProjects();
+        }
+
+        // --- Run Projects ---
+        function renderRunProjects() {
+            const grid = document.getElementById('runProjectsGrid');
+            grid.innerHTML = '';
+            
+            allProjects.forEach(proj => {
+                const lbl = document.createElement('label');
+                lbl.className = 'run-project-card';
+                
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = proj.ProjectName;
+                
+                const span = document.createElement('span');
+                span.textContent = proj.ProjectName + (proj.ProjectType ? ` [${proj.ProjectType}]` : '');
+                
+                lbl.appendChild(cb);
+                lbl.appendChild(span);
+                grid.appendChild(lbl);
+            });
+        }
+
+        let isDeploying = false;
+        let logPollInterval = null;
+
+        async function startDeployment() {
+            if (isDeploying) return;
+            
+            const checkboxes = document.querySelectorAll('#runProjectsGrid input[type="checkbox"]:checked');
+            const projects = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (projects.length === 0) {
+                alert("Please select at least one project.");
+                return;
+            }
+
+            isDeploying = true;
+            document.getElementById('deployBtn').disabled = true;
+            document.getElementById('deployBtn').textContent = 'Deploying...';
+            document.getElementById('logsContainer').innerHTML = '';
+
+            logPollInterval = setInterval(pollLogs, 1000);
+
+            try {
+                await fetch('/api/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Projects: projects })
+                });
+            } catch (err) {
+                console.error(err);
+            } finally {
+                isDeploying = false;
+                document.getElementById('deployBtn').disabled = false;
+                document.getElementById('deployBtn').textContent = 'Start Deployment ⚡';
+                setTimeout(pollLogs, 1000); 
+                setTimeout(() => clearInterval(logPollInterval), 2000);
+            }
+        }
+
+        async function pollLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+                const container = document.getElementById('logsContainer');
+                
+                let formattedHtml = '';
+                data.logs.forEach(log => {
+                    if (log.includes('❌') || log.toLowerCase().includes('error')) {
+                        formattedHtml += `<span class="log-error">${log}</span><br>`;
+                    } else if (log.includes('✅')) {
+                        formattedHtml += `<span class="log-success">${log}</span><br>`;
+                    } else {
+                        formattedHtml += `<span class="log-info">${log}</span><br>`;
+                    }
+                });
+                
+                if (container.innerHTML !== formattedHtml) {
+                    container.innerHTML = formattedHtml;
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (e) {}
+        }
+
+        // --- Manage Projects ---
+        function renderManageProjects() {
+            const list = document.getElementById('manageProjectsList');
+            list.innerHTML = '';
+            
+            if (allProjects.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted)">No projects found. Create one!</p>';
+                return;
+            }
+
+            allProjects.forEach((proj, idx) => {
+                const div = document.createElement('div');
+                div.className = 'project-list-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${proj.ProjectName}</strong> ${proj.ProjectType ? `<span style="color:var(--primary-color); font-size:12px; margin-left: 5px;">[${proj.ProjectType}]</span>` : ''} <span style="color:var(--text-muted); font-size:12px;">(ID: ${proj.ProjectID})</span>
+                        <div style="font-size: 12px; color: var(--primary-color); margin-top: 5px;">${proj.Processes ? proj.Processes.length : 0} Processes</div>
+                    </div>
+                    <div class="actions">
+                        <button class="secondary" onclick="editProject(${idx})">Edit</button>
+                        <button class="danger" onclick="deleteProject(${idx})">Delete</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function openProjectModal(editIdx = -1) {
+            editingProjectIndex = editIdx;
+            const modal = document.getElementById('projectModal');
+            const processesContainer = document.getElementById('processesContainer');
+            processesContainer.innerHTML = '';
+
+            if (editIdx >= 0) {
+                const proj = allProjects[editIdx];
+                document.getElementById('modalTitle').textContent = 'Edit Project';
+                document.getElementById('projNameInput').value = proj.ProjectName || '';
+                document.getElementById('projTypeInput').value = proj.ProjectType || '';
+                document.getElementById('projIdInput').value = proj.ProjectID || 0;
+                
+                if (proj.Processes) {
+                    proj.Processes.forEach(proc => addProcessUI(proc.Type, proc));
+                }
+            } else {
+                document.getElementById('modalTitle').textContent = 'New Project';
+                document.getElementById('projNameInput').value = '';
+                document.getElementById('projTypeInput').value = '';
+                document.getElementById('projIdInput').value = 0;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+        }
+
+        function addProcessFromSelect() {
+            const type = document.getElementById('processTypeSelect').value;
+            if (type) addProcessUI(type, {});
+        }
+
+        function updateProcessIndices() {
+            document.querySelectorAll('.process-data-block').forEach((card, i) => {
+                const badge = card.querySelector('.order-idx');
+                if (badge) badge.textContent = i + 1;
+            });
+        }
+
+        function reorderProcess(btn, direction) {
+            const card = btn.closest('.process-data-block');
+            const container = card.parentElement;
+            if (direction === 'up' && card.previousElementSibling) {
+                container.insertBefore(card, card.previousElementSibling);
+            } else if (direction === 'down' && card.nextElementSibling) {
+                container.insertBefore(card.nextElementSibling, card);
+            }
+            updateProcessIndices();
+        }
+
+        function addProcessUI(type, initialData = {}) {
+            const procMeta = availableProcesses.find(p => p.Name === type);
+            if (!procMeta) return;
+
+            const container = document.getElementById('processesContainer');
+            const currentIndex = container.querySelectorAll('.process-data-block').length + 1;
+            const card = document.createElement('div');
+            card.className = 'process-card process-data-block';
+            card.dataset.type = type;
+
+            let html = `
+                <div class="process-order-controls">
+                    <button class="order-btn" onclick="reorderProcess(this, 'up')" title="Move Up">▲</button>
+                    <span class="order-idx">${currentIndex}</span>
+                    <button class="order-btn" onclick="reorderProcess(this, 'down')" title="Move Down">▼</button>
+                </div>
+                <h4>⚙️ ${type}</h4>
+                <button class="remove-process" onclick="this.closest('.process-data-block').remove(); updateProcessIndices();">✕</button>
+            `;
+
+            html += buildPropertyFields(procMeta.Properties, initialData, '');
+
+            card.innerHTML = html;
+            container.appendChild(card);
+        }
+
+        function buildPropertyFields(properties, initialData, pathPrefix) {
+            let html = '';
+            if (!properties) return html;
+
+            properties.forEach(prop => {
+                if (prop.Name === 'Type' || prop.Name === 'IndexRuning') return;
+
+                const fullPath = pathPrefix ? `${pathPrefix}.${prop.Name}` : prop.Name;
+                const val = initialData && initialData[prop.Name] !== undefined ? initialData[prop.Name] : '';
+
+                if (prop.Type === 'Object' && prop.Fields) {
+                    // Nested Object
+                    html += `<fieldset style="margin-bottom:10px; border:1px solid rgba(255,255,255,0.2); border-radius:5px; padding:10px;">
+                        <legend style="color:var(--primary-color); font-size:12px; padding:0 5px;">${prop.Name}</legend>
+                        ${buildPropertyFields(prop.Fields, val || {}, fullPath)}
+                    </fieldset>`;
+                } else {
+                    // Primitive
+                    html += `<div class="form-group">
+                        <label>${prop.Name} (${prop.Type})</label>`;
+
+                    if (prop.Type === 'Boolean' || prop.Type === 'bool') {
+                        const checked = val ? 'checked' : '';
+                        html += `<input type="checkbox" data-prop="${fullPath}" data-type="${prop.Type}" ${checked}>`;
+                    } else if (prop.Type === 'Int32' || prop.Type === 'int') {
+                        html += `<input type="number" data-prop="${fullPath}" data-type="${prop.Type}" value="${val}">`;
+                    } else {
+                        html += `<input type="text" data-prop="${fullPath}" data-type="${prop.Type}" value="${val}">`;
+                    }
+                    html += `</div>`;
+                }
+            });
+            return html;
+        }
+
+        async function saveProject() {
+            const name = document.getElementById('projNameInput').value;
+            const typeValue = document.getElementById('projTypeInput').value;
+            const id = parseInt(document.getElementById('projIdInput').value) || 0;
+            
+            if (!name) {
+                alert("Project Name is required.");
+                return;
+            }
+
+            const processes = [];
+            document.querySelectorAll('.process-data-block').forEach((card, cardIndex) => {
+                const type = card.dataset.type;
+                const procMeta = availableProcesses.find(p => p.Name === type);
+
+                const procObj = { Type: type, IndexRuning: cardIndex + 1 };
+
+                const inputs = card.querySelectorAll('input[data-prop]');
+                inputs.forEach(input => {
+                    const path = input.getAttribute('data-prop');
+                    const propType = input.getAttribute('data-type');
+                    let val;
+
+                    if (propType === 'Boolean' || propType === 'bool') {
+                        val = input.checked;
+                    } else if (propType === 'Int32' || propType === 'int') {
+                        val = parseInt(input.value) || 0;
+                    } else {
+                        val = input.value;
+                    }
+
+                    // Set nested value
+                    const parts = path.split('.');
+                    let current = procObj;
+                    for (let i = 0; i < parts.length - 1; i++) {
+                        if (!current[parts[i]]) current[parts[i]] = {};
+                        current = current[parts[i]];
+                    }
+                    current[parts[parts.length - 1]] = val;
+                });
+                processes.push(procObj);
+            });
+
+            const newProj = {
+                ProjectName: name,
+                ProjectType: typeValue,
+                ProjectID: id,
+                Processes: processes
+            };
+
+            if (editingProjectIndex >= 0) {
+                allProjects[editingProjectIndex] = newProj;
+            } else {
+                allProjects.push(newProj);
+            }
+
+            await saveProjectsToServer();
+            closeProjectModal();
+            renderManageProjects();
+        }
+
+        function editProject(idx) {
+            openProjectModal(idx);
+        }
+
+        async function deleteProject(idx) {
+            if (confirm("Are you sure you want to delete this project?")) {
+                allProjects.splice(idx, 1);
+                await saveProjectsToServer();
+                renderManageProjects();
+            }
+        }
+
+        // --- Export / Import ---
+        function exportProjects() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allProjects, null, 4));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href",     dataStr);
+            downloadAnchorNode.setAttribute("download", "projects_backup.json");
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importProjects(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const contents = e.target.result;
+                    const parsed = JSON.parse(contents);
+                    if (!Array.isArray(parsed)) {
+                        alert("Invalid format: File must contain a JSON array of projects.");
+                        return;
+                    }
+                    if (parsed.length > 0 && typeof parsed[0] === 'object' && !('ProjectName' in parsed[0])) {
+                        alert("Invalid format: Missing 'ProjectName' property in array items.");
+                        return;
+                    }
+                    allProjects = parsed;
+                    await saveProjectsToServer();
+                    renderManageProjects();
+                    alert("Projects imported successfully!");
+                } catch (err) {
+                    alert("Failed to parse JSON file.");
+                    console.error(err);
+                }
+                event.target.value = ''; // reset input
+            };
+            reader.readAsText(file);
+        }
+        
+        function downloadLogs() {
+            const container = document.getElementById('logsContainer');
+            if(!container.innerText) {
+                alert("No logs to download!");
+                return;
+            }
+            const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(container.innerText);
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href",     dataStr);
+            downloadAnchorNode.setAttribute("download", "deployment_logs.txt");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // ─── Custom Tools ─────────────────────────────────────────────────────
+
+        let monacoModelEditor = null;
+        let monacoWorkflowEditor = null;
+        let ctCurrentTab = 'model';
+        let ctCurrentTool = null;
+        let ctPackages = [];
+        let monacoReady = false;
+
+        const MODEL_TEMPLATE = `namespace DeepOcean.Deploy.Tools
+{
+    public class MyCustomTool : EventTools
+    {
+        public string MyProperty { get; set; } = string.Empty;
+    }
+}`;
+
+        const WORKFLOW_TEMPLATE = `using DeepOcean.Deploy.Tools;
+
+namespace DeepOcean.Deploy.WorkFlow
+{
+    internal class MyCustomTool_WorkFlow
+    {
+        public static object Start(MyCustomTool Config)
+        {
+            // Your logic here
+            return true;
+        }
+    }
+}`;
+
+        function initMonaco() {
+            if (monacoReady) return;
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+            require(['vs/editor/editor.main'], function () {
+                monacoReady = true;
+
+                // Dark theme matching our UI
+                monaco.editor.defineTheme('deepocean', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [],
+                    colors: { 'editor.background': '#0a0f1e' }
+                });
+
+                monacoModelEditor = monaco.editor.create(document.getElementById('monacoEditorModel'), {
+                    value: MODEL_TEMPLATE,
+                    language: 'csharp',
+                    theme: 'deepocean',
+                    fontSize: 13,
+                    minimap: { enabled: false },
+                    automaticLayout: true,
+                });
+
+                monacoWorkflowEditor = monaco.editor.create(document.getElementById('monacoEditorWorkflow'), {
+                    value: WORKFLOW_TEMPLATE,
+                    language: 'csharp',
+                    theme: 'deepocean',
+                    fontSize: 13,
+                    minimap: { enabled: false },
+                    automaticLayout: true,
+                });
+
+                // Two-way sync listeners
+                monacoModelEditor.onDidChangeModelContent(() => {
+                    if (isSyncingName) return;
+                    syncNameFromEditor(monacoModelEditor.getValue(), 'model');
+                });
+                monacoWorkflowEditor.onDidChangeModelContent(() => {
+                    if (isSyncingName) return;
+                    syncNameFromEditor(monacoWorkflowEditor.getValue(), 'workflow');
+                });
+            });
+        }
+
+        let isSyncingName = false;
+
+        function syncNameFromInput(newName) {
+            if (!newName || !monacoModelEditor || !monacoWorkflowEditor) return;
+            const safeName = newName.replace(/[^a-zA-Z0-9_]/g, '');
+            if (!safeName) return;
+
+            isSyncingName = true;
+            
+            // Sync Model Editor
+            let modelCode = monacoModelEditor.getValue();
+            modelCode = modelCode.replace(/class \w+/g, `class ${safeName}`);
+            modelCode = modelCode.replace(/public \w+\s*\(/g, `public ${safeName}(`);
+            if (modelCode !== monacoModelEditor.getValue()) {
+                monacoModelEditor.setValue(modelCode);
+            }
+
+            // Sync Workflow Editor
+            let wfCode = monacoWorkflowEditor.getValue();
+            wfCode = wfCode.replace(/class \w+_WorkFlow/g, `class ${safeName}_WorkFlow`);
+            wfCode = wfCode.replace(/Start\(\w+ /g, `Start(${safeName} `);
+            if (wfCode !== monacoWorkflowEditor.getValue()) {
+                monacoWorkflowEditor.setValue(wfCode);
+            }
+
+            isSyncingName = false;
+        }
+
+        function syncNameFromEditor(code, source) {
+            isSyncingName = true;
+            let extractedName = null;
+
+            if (source === 'model') {
+                const match = code.match(/class (\w+)/);
+                if (match && match[1]) extractedName = match[1];
+            } else if (source === 'workflow') {
+                const match = code.match(/class (\w+)_WorkFlow/);
+                if (match && match[1]) extractedName = match[1];
+            }
+
+            if (extractedName && extractedName !== 'EventTools' && extractedName !== 'MyCustomTool') {
+                const nameInput = document.getElementById('ctToolName');
+                if (nameInput.value !== extractedName) {
+                    nameInput.value = extractedName;
+                    // Sync the other editor
+                    if (source === 'model') {
+                        let wfCode = monacoWorkflowEditor.getValue();
+                        wfCode = wfCode.replace(/class \w+_WorkFlow/g, `class ${extractedName}_WorkFlow`);
+                        wfCode = wfCode.replace(/Start\(\w+ /g, `Start(${extractedName} `);
+                        if (wfCode !== monacoWorkflowEditor.getValue()) monacoWorkflowEditor.setValue(wfCode);
+                    } else {
+                        let modelCode = monacoModelEditor.getValue();
+                        modelCode = modelCode.replace(/class \w+/g, `class ${extractedName}`);
+                        modelCode = modelCode.replace(/public \w+\s*\(/g, `public ${extractedName}(`);
+                        if (modelCode !== monacoModelEditor.getValue()) monacoModelEditor.setValue(modelCode);
+                    }
+                }
+            }
+            isSyncingName = false;
+        }
+
+        async function loadCtTools() {
+            try {
+                const res = await fetch('/api/custom-tools');
+                const tools = await res.json();
+                const list = document.getElementById('ctToolList');
+                list.innerHTML = '';
+                tools.forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'ct-tool-item' + (ctCurrentTool === name ? ' selected' : '');
+                    item.innerHTML = `<span>${name}</span><span class="ct-del" onclick="deleteCtTool(event,'${name}')">✕</span>`;
+                    item.addEventListener('click', () => openCtTool(name));
+                    list.appendChild(item);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function openCtTool(name) {
+            ctCurrentTool = name;
+            const res = await fetch(`/api/custom-tools/${name}`);
+            const tool = await res.json();
+
+            document.getElementById('ctToolName').value = tool.Name || name;
+            ctPackages = tool.Packages || [];
+            renderCtPackages();
+
+            if (monacoModelEditor) monacoModelEditor.setValue(tool.ModelCode || MODEL_TEMPLATE);
+            if (monacoWorkflowEditor) monacoWorkflowEditor.setValue(tool.WorkFlowCode || WORKFLOW_TEMPLATE);
+
+            showCtEditor();
+            loadCtTools();
+        }
+
+        function newCustomTool() {
+            ctCurrentTool = null;
+            document.getElementById('ctToolName').value = '';
+            ctPackages = [];
+            renderCtPackages();
+
+            if (monacoModelEditor) monacoModelEditor.setValue(MODEL_TEMPLATE);
+            if (monacoWorkflowEditor) monacoWorkflowEditor.setValue(WORKFLOW_TEMPLATE);
+
+            showCtEditor();
+            document.querySelectorAll('.ct-tool-item').forEach(el => el.classList.remove('selected'));
+        }
+
+        function showCtEditor() {
+            const header = document.getElementById('ctEditorHeader');
+            header.style.display = 'flex';
+            document.getElementById('ctEditorPlaceholder').style.display = 'none';
+            switchCtTab('model');
+        }
+
+        function cancelCtEdit() {
+            document.getElementById('ctEditorHeader').style.display = 'none';
+            document.getElementById('ctEditorPlaceholder').style.display = 'flex';
+            document.getElementById('monacoEditorModel').style.display = 'none';
+            document.getElementById('monacoEditorWorkflow').style.display = 'none';
+            ctCurrentTool = null;
+            loadCtTools();
+        }
+
+        function switchCtTab(tab) {
+            ctCurrentTab = tab;
+            document.getElementById('tabModel').classList.toggle('active', tab === 'model');
+            document.getElementById('tabWorkflow').classList.toggle('active', tab === 'workflow');
+            document.getElementById('monacoEditorModel').style.display = tab === 'model' ? 'block' : 'none';
+            document.getElementById('monacoEditorWorkflow').style.display = tab === 'workflow' ? 'block' : 'none';
+            if (tab === 'model' && monacoModelEditor) monacoModelEditor.layout();
+            if (tab === 'workflow' && monacoWorkflowEditor) monacoWorkflowEditor.layout();
+        }
+
+        async function saveCustomTool() {
+            const name = document.getElementById('ctToolName').value.trim();
+            if (!name) { alert('Tool name is required.'); return; }
+            if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) { alert('Tool name must be a valid C# class name.'); return; }
+
+            const payload = {
+                Name: name,
+                ModelCode: monacoModelEditor ? monacoModelEditor.getValue() : '',
+                WorkFlowCode: monacoWorkflowEditor ? monacoWorkflowEditor.getValue() : '',
+                Packages: ctPackages,
+            };
+
+            const res = await fetch('/api/custom-tools', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                ctCurrentTool = name;
+                alert(`✅ Tool '${name}' saved successfully!`);
+                await loadCtTools();
+                // Also refresh available processes list for Manage Projects
+                await fetchProcesses();
+            } else {
+                alert('❌ Failed to save tool.');
+            }
+        }
+
+        async function compileCustomTool() {
+
+            console.log("-------------------------------");
+
+            const name = document.getElementById('ctToolName').value.trim();
+            if (!name) { alert('Tool name is required to compile.'); return; }
+
+            const payload = {
+                Name: name,
+                ModelCode: monacoModelEditor ? monacoModelEditor.getValue() : '',
+                WorkFlowCode: monacoWorkflowEditor ? monacoWorkflowEditor.getValue() : '',
+                Packages: ctPackages,
+            };
+
+            const btn = document.querySelector('button[onclick="compileCustomTool()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⚙️ Compiling...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/custom-tools/compile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+                if (result.Success) {
+                    console.log('✅ Compilation successful!\n\nLogs:\n' + result.Logs.join('\n'));
+                    alert('✅ Compilation successful!\n\nLogs:\n' + result.Logs.join('\n'));
+                } else {
+                    console.log('❌ Compilation failed!\n\nError:\n' + result.Error + '\n\nLogs:\n' + result.Logs.join('\n'));
+                    alert('❌ Compilation failed!\n\nError:\n' + result.Error + '\n\nLogs:\n' + result.Logs.join('\n'));
+                }
+            } catch (err) {
+                alert('Error compiling tool: ' + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function exportCtp() {
+            const name = document.getElementById('ctToolName').value.trim();
+            if (!name) { alert('Please save or name the tool first.'); return; }
+
+            const payload = {
+                Name: name,
+                ModelCode: monacoModelEditor ? monacoModelEditor.getValue() : '',
+                WorkFlowCode: monacoWorkflowEditor ? monacoWorkflowEditor.getValue() : '',
+                Packages: ctPackages,
+            };
+
+            const jsonStr = JSON.stringify(payload);
+            const base64 = btoa(unescape(encodeURIComponent(jsonStr))); // encode to make it look "complex"
+
+            const blob = new Blob([base64], { type: 'application/ctp' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name + '.ctp';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerImportCtp() {
+            document.getElementById('ctpFileInput').click();
+        }
+
+        async function handleImportCtp(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const base64 = e.target.result;
+                    const jsonStr = decodeURIComponent(escape(atob(base64)));
+                    const tool = JSON.parse(jsonStr);
+
+                    if (!tool.Name || !tool.ModelCode) throw new Error("Invalid .CTP file format.");
+
+                    // Save directly to backend
+                    const res = await fetch('/api/custom-tools', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(tool)
+                    });
+
+                    if (res.ok) {
+                        alert(`✅ Tool '${tool.Name}' imported successfully!`);
+                        await loadCtTools();
+                        await fetchProcesses();
+                        openCtTool(tool.Name); // open it in editor
+                    } else {
+                        alert('❌ Failed to import tool to server.');
+                    }
+                } catch (err) {
+                    alert('❌ Invalid or corrupted .CTP file.\n\nError: ' + err.message);
+                }
+                // Reset file input
+                document.getElementById('ctpFileInput').value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        async function deleteCtTool(event, name) {
+            event.stopPropagation();
+            if (!confirm(`Delete tool '${name}'?`)) return;
+            await fetch(`/api/custom-tools/${name}`, { method: 'DELETE' });
+            if (ctCurrentTool === name) cancelCtEdit();
+            await loadCtTools();
+            await fetchProcesses();
+        }
+
+        function addCtPackage() {
+            const input = document.getElementById('ctPkgInput');
+            const val = input.value.trim();
+            if (!val) return;
+            if (!ctPackages.includes(val)) ctPackages.push(val);
+            input.value = '';
+            renderCtPackages();
+        }
+
+        function removeCtPackage(pkg) {
+            ctPackages = ctPackages.filter(p => p !== pkg);
+            renderCtPackages();
+        }
+
+        function renderCtPackages() {
+            const container = document.getElementById('ctPkgList');
+            container.innerHTML = '';
+            ctPackages.forEach(pkg => {
+                const tag = document.createElement('div');
+                tag.className = 'ct-pkg-tag';
+                tag.innerHTML = `${pkg} <span onclick="removeCtPackage('${pkg}')">✕</span>`;
+                container.appendChild(tag);
+            });
+        }
+
+        // Run init on load
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>

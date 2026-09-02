@@ -1,0 +1,53 @@
+{
+    "environments": {
+        "local": {
+            "is_production_channel": false,
+            "CAT_Backend_ConnectionString": "Server=localhost;Database=CAT;User Id=sa;Password=yourpassword;TrustServerCertificate=True;",
+            "DeepOcean_Console_ConnectionString": "Server=localhost;Database=DeepOcean;User Id=sa;Password=yourpassword;TrustServerCertificate=True;",
+            "DeepOcean_DataServer_ConnectionString": "Server=localhost;Database=DeepOceanData;User Id=sa;Password=yourpassword;TrustServerCertificate=True;",
+            "publish_profiles": {
+                "CAT.Backend": "Properties\\PublishProfiles\\FolderProfile.pubxml",
+                "DeepOcean.Console": "Properties\\PublishProfiles\\FolderProfile.pubxml",
+                "DeepOcean.DataServer": "Properties\\PublishProfiles\\FolderProfile.pubxml"
+            }
+        },
+        "public": {
+            "is_production_channel": true,
+            "CAT_Backend_ConnectionString": "Server=cloud_server;Database=CAT;User Id=sa;Password=yourpassword;TrustServerCertificate=True;",
+            "DeepOcean_Console_ConnectionString": "Server=cloud_server;Database=DeepOcean;User Id=sa;Password=yourpassword;TrustServerCertificate=True;",
+            "DeepOcean_DataServer_ConnectionString": "Server=cloud_server;Database=DeepOceanData;User Id=sa;Password=yourpassword;TrustServerCertificate=True;",
+            "publish_profiles": {
+                "CAT.Backend": "Properties\\PublishProfiles\\this is New Site Loc Deep Ocean FBM.pubxml",
+                "DeepOcean.Console": "Properties\\PublishProfiles\\site82860-WebDeploy.pubxml",
+                "DeepOcean.DataServer": "Properties\\PublishProfiles\\site81842-WebDeploy.pubxml"
+            }
+        }
+    },
+    "projects": {
+        "Frontend": {
+            "path": "..\\Backends\\Console\\deepocean.console.frontend",
+            "appsettings_path": "..\\Backends\\Console\\deepocean.console.frontend\\public\\appsettings.json",
+            "dist_path": "..\\Backends\\Console\\deepocean.console.frontend\\dist",
+            "wwwroot_dest": "..\\Backends\\Console\\DeepOcean.Console\\wwwroot"
+        },
+        "CAT.Backend": {
+            "path": "..\\Backends\\CAT.Backend",
+            "appsettings_path": "..\\Backends\\CAT.Backend\\appsettings.json",
+            "publish_profile": "Properties\\PublishProfiles\\FolderProfile.pubxml"
+        },
+        "DeepOcean.Console": {
+            "path": "..\\Backends\\Console\\DeepOcean.Console",
+            "appsettings_path": "..\\Backends\\Console\\DeepOcean.Console\\appsettings.json",
+            "publish_profile": "Properties\\PublishProfiles\\FolderProfile.pubxml"
+        },
+        "DeepOcean.DataServer": {
+            "path": "..\\Backends\\DeepOcean.DataServer",
+            "appsettings_path": "..\\Backends\\DeepOcean.DataServer\\appsettings.json",
+            "publish_profile": "Properties\\PublishProfiles\\FolderProfile.pubxml"
+        },
+        "DeepOcean.Console.BuilderApps": {
+            "path": "..\\Backends\\Console\\DeepOcean.Console.BuilderApps",
+            "publish_profile": "Properties\\PublishProfiles\\FolderProfile.pubxml"
+        }
+    }
+}

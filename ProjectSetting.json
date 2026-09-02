@@ -1,0 +1,20 @@
+{
+    "Projects": [
+        {
+            "ProjectID": 1,
+            "Language": "C#",
+            "ProjectName": "xxx",
+            "Path": "C:\\...",
+            "Stap" : ["Build","Move",""]
+        }
+    ],
+    "StapWorking": [
+        {
+            "ProviderID": 1,
+            "Buiild": {
+
+            }
+        }
+    ]
+
+}
