@@ -1,0 +1,56 @@
+[
+  {
+    "ProjectName": "Project1",
+    "ProjectType": "Env1",
+    "ProjectID": 1,
+    "Processes": [
+      {
+        "Type": "Tool1",
+        "IndexRuning": 1,
+        "ConnectionString": "string2"
+      },
+      {
+        "Type": "Tool1",
+        "IndexRuning": 2,
+        "ConnectionString": "string3"
+      },
+      {
+        "Type": "Tool1",
+        "IndexRuning": 3,
+        "ConnectionString": "string1"
+      },
+      {
+        "Type": "Tool1",
+        "IndexRuning": 4,
+        "ConnectionString": "string4"
+      }
+    ]
+  },
+  {
+    "ProjectName": "ProjectAnglaur",
+    "ProjectType": "V1",
+    "ProjectID": 4,
+    "Processes": [
+      {
+        "Type": "AngularFtpDeployTool",
+        "IndexRuning": 1,
+        "ProjectPath": "",
+        "BuildOutputPath": "",
+        "PreferNpmCi": false,
+        "RunCheck": false,
+        "RunBuild": false,
+        "FtpHost": "",
+        "FtpPort": 0,
+        "FtpUsername": "",
+        "FtpPassword": "",
+        "FtpRemotePath": "",
+        "UseFtps": false,
+        "UseImplicitFtps": false,
+        "AcceptInvalidCertificate": false,
+        "OverwriteExistingFiles": false,
+        "VerifyUpload": false,
+        "MirrorRemoteDirectory": false
+      }
+    ]
+  }
+]

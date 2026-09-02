@@ -15,4 +15,9 @@
     <PackageReference Include="NuGet.Resolver" Version="7.9.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="WorkFlow\" />
+  </ItemGroup>
+
+
 </Project>

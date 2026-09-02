@@ -202,14 +202,25 @@ namespace DeepOcean.Deploy.Services
             // Collect all references: current app's assemblies + extra NuGet DLLs
             var references = new List<MetadataReference>();
 
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            var trustedAssemblies = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
+            if (!string.IsNullOrEmpty(trustedAssemblies))
             {
-                try
+                foreach (var refPath in trustedAssemblies.Split(Path.PathSeparator))
                 {
-                    if (!asm.IsDynamic && !string.IsNullOrEmpty(asm.Location))
-                        references.Add(MetadataReference.CreateFromFile(asm.Location));
+                    references.Add(MetadataReference.CreateFromFile(refPath));
                 }
-                catch { }
+            }
+            else
+            {
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    try
+                    {
+                        if (!asm.IsDynamic && !string.IsNullOrEmpty(asm.Location))
+                            references.Add(MetadataReference.CreateFromFile(asm.Location));
+                    }
+                    catch { }
+                }
             }
 
             foreach (var dll in extraDllPaths)
