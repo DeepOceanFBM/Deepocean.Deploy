@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/obj/Debug/net9.0/DeepOcean.Deploy.AssemblyInfoInputs.cache
+/obj
+/bin

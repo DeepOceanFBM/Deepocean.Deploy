@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DeepOcean.Deploy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5caea04ab2e28c1fff5f9cff56f3a866e90206d8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+093f50ab06606495f58b98de02fce6ceefd65cc9")]
 [assembly: System.Reflection.AssemblyProductAttribute("DeepOcean.Deploy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DeepOcean.Deploy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
