@@ -1,55 +1,115 @@
 [
   {
-    "ProjectName": "Project1",
-    "ProjectType": "Env1",
+    "ProjectName": "DeepOceanFBM (Local Env)",
+    "ProjectType": "Local",
     "ProjectID": 1,
     "Processes": [
       {
-        "Type": "Tool1",
+        "Type": "FrontendDeployTool",
         "IndexRuning": 1,
-        "ConnectionString": "string2"
+        "ProjectPath": "E:\\Project\\DeepOcean.Console\\Backends\\Console\\deepocean.console.frontend",
+        "ProductionChannel": false,
+        "TemplateFolderPath": "E:\\Project\\DeepOcean.Console\\Clinet\\DeepOcean.Frontend.Templates\\DeepOcean.Frontend.Template",
+        "ConsoleOutputPath": "E:\\Project\\DeepOcean.Console\\Backends\\Console\\DeepOcean.Console"
       },
       {
-        "Type": "Tool1",
+        "Type": "BackendPublishTool",
         "IndexRuning": 2,
-        "ConnectionString": "string3"
+        "ProjectPath": "E:\\Project\\DeepOcean.Console\\Backends\\Console\\DeepOcean.Console",
+        "ConnectionString": "Server=DESKTOP-LBVAP7B;Database=DeepOceanBaseDataConsole;User Id=admin;Password=123123123;TrustServerCertificate=True;",
+        "PublishProfile": "FolderProfile.pubxml",
+        "BuildConfiguration": "Release",
+        "ProductionChannel": false,
+        "SolutionID": "Console",
+        "FtpInfo": {
+          "Host": "",
+          "Port": 22,
+          "Username": "",
+          "Password": "",
+          "RemotePath": "",
+          "SshHostKeyFingerprint": ""
+        }
       },
       {
-        "Type": "Tool1",
+        "Type": "BackendPublishTool",
+        "IndexRuning": 2,
+        "ProjectPath": "E:\\Project\\DeepOcean.Console\\Backends\\Console\\DeepOcean.Console.BuilderApps",
+        "ConnectionString": "",
+        "PublishProfile": "FolderProfile.pubxml",
+        "BuildConfiguration": "Release",
+        "ProductionChannel": false,
+        "SolutionID": "builderapps",
+        "FtpInfo": {
+          "Host": "",
+          "Port": 22,
+          "Username": "",
+          "Password": "",
+          "RemotePath": "",
+          "SshHostKeyFingerprint": ""
+        }
+      },
+      {
+        "Type": "BackendPublishTool",
         "IndexRuning": 3,
-        "ConnectionString": "string1"
+        "ProjectPath": "E:\\Project\\DeepOcean.Console\\Backends\\DeepOcean.DataServer",
+        "ConnectionString": "Server=DESKTOP-LBVAP7B;Database=DeepOceanBaseDataServer;User Id=admin;Password=123123123;TrustServerCertificate=True;",
+        "MarketPlaseBackendUrl": "http://192.168.1.2:2817",
+        "PublishProfile": "FolderProfile.pubxml",
+        "BuildConfiguration": "Release",
+        "ProductionChannel": false,
+        "SolutionID": "dataserver",
+        "FtpInfo": {
+          "Host": "",
+          "Port": 22,
+          "Username": "",
+          "Password": "",
+          "RemotePath": "",
+          "SshHostKeyFingerprint": ""
+        }
       },
       {
-        "Type": "Tool1",
+        "Type": "BackendPublishTool",
         "IndexRuning": 4,
-        "ConnectionString": "string4"
+        "ProjectPath": "E:\\Project\\DeepOcean.Console\\Backends\\CAT.Backend\\CAT.Backend",
+        "ConnectionString": "Server=DESKTOP-LBVAP7B;Database=DeepOceanBaseData;User Id=admin;Password=123123123;TrustServerCertificate=True;",
+        "PublishProfile": "FolderProfile.pubxml",
+        "BuildConfiguration": "Release",
+        "ProductionChannel": false,
+        "SolutionID": "marketplase",
+        "FtpInfo": {
+          "Host": "",
+          "Port": 22,
+          "Username": "",
+          "Password": "",
+          "RemotePath": "",
+          "SshHostKeyFingerprint": ""
+        }
       }
     ]
   },
   {
-    "ProjectName": "ProjectAnglaur",
-    "ProjectType": "V1",
-    "ProjectID": 4,
+    "ProjectName": "DeepOceanFBM Builder (Local Env)",
+    "ProjectType": "Local",
+    "ProjectID": 2,
     "Processes": [
       {
-        "Type": "AngularFtpDeployTool",
+        "Type": "BackendPublishTool",
         "IndexRuning": 1,
-        "ProjectPath": "",
-        "BuildOutputPath": "",
-        "PreferNpmCi": false,
-        "RunCheck": false,
-        "RunBuild": false,
-        "FtpHost": "",
-        "FtpPort": 0,
-        "FtpUsername": "",
-        "FtpPassword": "",
-        "FtpRemotePath": "",
-        "UseFtps": false,
-        "UseImplicitFtps": false,
-        "AcceptInvalidCertificate": false,
-        "OverwriteExistingFiles": false,
-        "VerifyUpload": false,
-        "MirrorRemoteDirectory": false
+        "ProjectPath": "E:\\Project\\DeepOcean.Console\\Backends\\Console\\DeepOcean.Console.BuilderApps",
+        "ConnectionString": "",
+        "PublishProfile": "",
+        "BuildConfiguration": "Release",
+        "MarketPlaseBackendUrl": "",
+        "ProductionChannel": true,
+        "SolutionID": "builderapps",
+        "FtpInfo": {
+          "Host": "site89695.siteasp.net",
+          "Port": 22,
+          "Username": "site89695",
+          "Password": "5Xt-Fp!8f2M%",
+          "RemotePath": "/wwwroot",
+          "SshHostKeyFingerprint": ""
+        }
       }
     ]
   }
