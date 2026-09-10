@@ -3,9 +3,9 @@
   <p><strong>A powerful, one-click deployment and automation orchestrator.</strong></p>
   
   <p>
-    <a href="https://github.com/Ahmed-Ashraf/DeepOcean.Deploy/issues"><img src="https://img.shields.io/github/issues/Ahmed-Ashraf/DeepOcean.Deploy" alt="Issues"></a>
-    <a href="https://github.com/Ahmed-Ashraf/DeepOcean.Deploy/stargazers"><img src="https://img.shields.io/github/stars/Ahmed-Ashraf/DeepOcean.Deploy" alt="Stars"></a>
-    <a href="https://github.com/Ahmed-Ashraf/DeepOcean.Deploy/network/members"><img src="https://img.shields.io/github/forks/Ahmed-Ashraf/DeepOcean.Deploy" alt="Forks"></a>
+    <a href="https://github.com/Ahmed-Ashraf/DeepOcean.Deploy/issues"><img src="https://img.shields.io/github/issues/DeepOceanFBM/Deepocean.Deploy" alt="Issues"></a>
+    <a href="https://github.com/Ahmed-Ashraf/DeepOcean.Deploy/stargazers"><img src="https://img.shields.io/github/stars/DeepOceanFBM/Deepocean.Deploy" alt="Stars"></a>
+    <a href="https://github.com/Ahmed-Ashraf/DeepOcean.Deploy/network/members"><img src="https://img.shields.io/github/forks/DeepOceanFBM/Deepocean.Deploy" alt="Forks"></a>
     <img src="https://img.shields.io/badge/Platform-.NET%209-blue" alt=".NET 9">
   </p>
 </div>
